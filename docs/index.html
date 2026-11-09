@@ -166,6 +166,27 @@
     footer a:hover { color: #ffb3bd; }
     footer p { margin: 0; }
 
+    /* Laptops and up: tighter vertical rhythm (phones keep the airier one). */
+    @media (min-width: 761px) {
+      .title-block { padding-top: 1.75rem; }
+      .title-block h1 { font-size: clamp(2.9rem, 6vw, 4.4rem); }
+      .demo { margin-top: 1rem; }
+      #staff { max-width: 54rem; margin: 0 auto; }
+      .controls { margin-top: .25rem; }
+      .lede { margin-top: 1.25rem; font-size: 1.15rem; }
+      .actions { margin-top: 1rem; }
+      .band { margin-top: 3rem; padding: 2.25rem 0; }
+      .band .page { max-width: 60rem; }
+      .text { padding-top: 3.25rem; }
+      h2 { margin-bottom: .6rem; }
+      dl.reads { margin-top: 1.25rem; row-gap: .9rem; }
+      .with-popup { gap: 2rem; grid-template-columns: minmax(0, 1fr) 16rem; align-items: start; }
+      .compare, .compare-labels { max-width: 60rem; }
+      .compare { margin-top: 1.25rem; }
+      ol.install { margin-top: 1rem; }
+      footer { margin-top: 3.5rem; padding: 1.75rem 0; }
+    }
+
     @media (max-width: 760px) {
       .title-block { grid-template-columns: 1fr; padding-top: 2.25rem; }
       .title-block h1, .title-block .sub, .title-block .left, .title-block .right { grid-column: 1; grid-row: auto; text-align: center; }
