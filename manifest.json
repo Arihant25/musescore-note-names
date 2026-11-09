@@ -1,0 +1,63 @@
+{
+  "manifest_version": 3,
+  "name": "Note Names for MuseScore",
+  "version": "1.0.0",
+  "description": "Shows note names on musescore.com sheet music, like MuseScore's Note Names plugin, plus a clutter-free focus mode.",
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_title": "Note Names for MuseScore",
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png"
+    }
+  },
+  "background": {
+    "service_worker": "src/background.js"
+  },
+  "permissions": [
+    "storage"
+  ],
+  "host_permissions": [
+    "https://musescore.com/*",
+    "https://*.musescore.com/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://musescore.com/*",
+        "https://*.musescore.com/*"
+      ],
+      "js": [
+        "src/analyzer.js",
+        "src/names.js",
+        "src/content.js",
+        "src/focus.js"
+      ],
+      "css": [
+        "src/content.css"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "commands": {
+    "toggle-note-names": {
+      "suggested_key": {
+        "default": "Alt+N"
+      },
+      "description": "Show / hide note names"
+    },
+    "toggle-focus-mode": {
+      "suggested_key": {
+        "default": "Alt+Shift+F"
+      },
+      "description": "Toggle focus mode (only the score and player)"
+    }
+  },
+  "homepage_url": "https://arihant25.github.io/musescore-note-names/"
+}

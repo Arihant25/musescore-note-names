@@ -1,0 +1,423 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Note Names for MuseScore</title>
+  <meta name="description" content="A free Chrome extension. It writes the name of every note on musescore.com sheet music. It also has a focus mode.">
+  <meta property="og:title" content="Note Names for MuseScore">
+  <meta property="og:description" content="The name of every note on musescore.com sheet music.">
+  <meta property="og:image" content="https://arihant25.github.io/musescore-note-names/img/focus.png">
+  <link rel="icon" href="img/icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --paper: #ffffff;
+      --ink: #000000;
+      --staff: #9aa0aa;
+      --red: #d0021b;
+      --navy: #202140;
+      --mist: #eef0f5;
+      --soft: #4a4d57;
+      --measure: 34rem;
+      --serif: "Old Standard TT", "Century Schoolbook", Georgia, serif;
+      --sans: "Atkinson Hyperlegible", system-ui, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font: 1.0625rem/1.6 var(--sans);
+    }
+    a { color: inherit; text-underline-offset: .18em; text-decoration-thickness: 1px; }
+    a:hover { color: var(--red); }
+    :focus-visible { outline: 3px solid var(--red); outline-offset: 3px; border-radius: 2px; }
+    img { max-width: 100%; height: auto; display: block; }
+
+    .page { max-width: 68rem; margin: 0 auto; padding: 0 1.25rem; }
+
+    /* score title block */
+    .title-block {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: end;
+      column-gap: 1rem;
+      padding: 3.5rem 1.25rem 0;
+    }
+    .title-block h1 {
+      grid-column: 2;
+      margin: 0;
+      font: 400 clamp(2.9rem, 8vw, 5.6rem)/1 var(--serif);
+      letter-spacing: -.01em;
+      text-align: center;
+    }
+    .title-block .sub {
+      grid-column: 2;
+      margin: .35rem 0 0;
+      font: italic 400 clamp(1.25rem, 2.6vw, 1.7rem)/1.2 var(--serif);
+      text-align: center;
+    }
+    .title-block .left, .title-block .right {
+      margin: 0;
+      font: 400 1rem/1.4 var(--serif);
+      color: var(--soft);
+      padding-bottom: .3rem;
+    }
+    .title-block .left { grid-column: 1; grid-row: 2; }
+    .title-block .right { grid-column: 3; grid-row: 2; text-align: right; }
+
+    /* live demo */
+    .demo { margin-top: 2rem; }
+    #staff svg { width: 100%; height: auto; display: block; }
+    #staff .nn {
+      font: 700 15px var(--sans);
+      fill: var(--red);
+      paint-order: stroke;
+      stroke: #fff;
+      stroke-width: 3px;
+      stroke-linejoin: round;
+      transition: opacity .25s ease;
+    }
+    #staff.off .nn { opacity: 0; }
+    .controls {
+      display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
+      gap: .75rem 1.5rem;
+      margin-top: .75rem;
+      font-size: .95rem;
+    }
+    .seg { display: inline-flex; border: 1.5px solid var(--ink); border-radius: 6px; overflow: hidden; }
+    .seg button {
+      font: inherit; padding: .35rem .8rem; border: 0; background: var(--paper); color: var(--ink); cursor: pointer;
+    }
+    .seg button + button { border-left: 1.5px solid var(--ink); }
+    .seg button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+    .toggle { display: inline-flex; align-items: center; gap: .5rem; cursor: pointer; }
+    .toggle input { accent-color: var(--red); width: 1.05rem; height: 1.05rem; }
+
+    .lede {
+      max-width: var(--measure);
+      margin: 2.5rem auto 0;
+      text-align: center;
+      font-size: 1.25rem;
+      line-height: 1.5;
+    }
+    .actions { display: flex; flex-wrap: wrap; gap: .75rem; justify-content: center; margin-top: 1.75rem; }
+    .btn {
+      display: inline-block; padding: .8rem 1.4rem; border-radius: 6px;
+      font: 700 1rem/1 var(--sans); text-decoration: none;
+      border: 1.5px solid var(--ink); color: var(--ink); background: var(--paper);
+    }
+    .btn:hover { color: var(--paper); background: var(--ink); }
+    .btn.primary { background: var(--red); border-color: var(--red); color: #fff; }
+    .btn.primary:hover { background: #a80016; border-color: #a80016; color: #fff; }
+    .fine { text-align: center; color: var(--soft); font-size: .9rem; margin: .9rem 0 0; }
+
+    /* sections */
+    .band { background: var(--mist); margin-top: 5rem; padding: 3.5rem 0; }
+    .band img { border-radius: 4px; box-shadow: 0 18px 40px -24px rgba(32, 33, 64, .45); }
+    .caption { max-width: var(--measure); color: var(--soft); margin: 1rem 0 0; font-size: .95rem; }
+
+    .text { padding-top: 5rem; }
+    h2 { font: 400 clamp(1.9rem, 3.6vw, 2.6rem)/1.15 var(--serif); margin: 0 0 1rem; }
+    .prose { max-width: var(--measure); }
+    .prose p { margin: 0 0 1rem; }
+
+    dl.reads { margin: 2rem 0 0; display: grid; grid-template-columns: 13rem minmax(0, var(--measure)); gap: 1.4rem 2.5rem; }
+    dl.reads dt { font: 700 1.2rem/1.35 var(--serif); }
+    dl.reads dd { margin: 0; color: var(--soft); }
+
+    .compare {
+      position: relative; margin-top: 2rem; border-radius: 4px; overflow: hidden;
+      box-shadow: 0 18px 40px -24px rgba(32, 33, 64, .45);
+      --pos: 50%;
+    }
+    .compare img { width: 100%; }
+    .compare .before { position: absolute; inset: 0; clip-path: inset(0 calc(100% - var(--pos)) 0 0); }
+    .compare .handle {
+      position: absolute; top: 0; bottom: 0; left: var(--pos); width: 2px; margin-left: -1px;
+      background: var(--red); pointer-events: none;
+    }
+    .compare .handle::after {
+      content: ""; position: absolute; top: 50%; left: 50%; width: 30px; height: 30px; margin: -15px 0 0 -15px;
+      border-radius: 50%; background: var(--red); box-shadow: 0 0 0 4px rgba(255, 255, 255, .9);
+    }
+    .compare input[type="range"] {
+      position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: ew-resize;
+    }
+    .compare:has(input:focus-visible) { outline: 3px solid var(--red); outline-offset: 3px; }
+    .compare-labels { display: flex; justify-content: space-between; color: var(--soft); font-size: .95rem; margin-top: .6rem; }
+    kbd { font: 700 .85em var(--sans); padding: .05em .4em; border: 1.5px solid var(--ink); border-radius: 4px; white-space: nowrap; }
+
+    .with-popup { display: grid; grid-template-columns: minmax(0, 1fr) 19rem; gap: 3rem; align-items: center; }
+    .with-popup img { border-radius: 8px; box-shadow: 0 18px 40px -20px rgba(32, 33, 64, .5); }
+
+    ol.install { margin: 1.5rem 0 0; padding-left: 1.4rem; max-width: var(--measure); }
+    ol.install li { margin: 0 0 .8rem; padding-left: .3rem; }
+    ol.install li::marker { font: 700 1.1rem var(--serif); color: var(--red); }
+    code { font: .92em ui-monospace, Consolas, monospace; background: var(--mist); padding: .1em .35em; border-radius: 3px; }
+
+    footer { margin-top: 6rem; background: var(--navy); color: #d9dbea; padding: 2.5rem 0; font-size: .95rem; }
+    footer .page { display: flex; flex-wrap: wrap; gap: 1rem 2.5rem; justify-content: space-between; }
+    footer a { color: #fff; }
+    footer a:hover { color: #ffb3bd; }
+    footer p { margin: 0; }
+
+    @media (max-width: 760px) {
+      .title-block { grid-template-columns: 1fr; padding-top: 2.25rem; }
+      .title-block h1, .title-block .sub, .title-block .left, .title-block .right { grid-column: 1; grid-row: auto; text-align: center; }
+      .title-block .left { order: -1; padding-bottom: 1rem; }
+      .title-block .right { padding-top: 1rem; }
+      dl.reads { grid-template-columns: 1fr; gap: .3rem; }
+      dl.reads dd { margin-bottom: 1rem; }
+      .with-popup { grid-template-columns: 1fr; }
+      .with-popup img { max-width: 19rem; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      #staff .nn { transition: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="title-block">
+    <h1>Note Names</h1>
+    <p class="sub">for MuseScore</p>
+    <p class="left">A Chrome extension<br>for musescore.com</p>
+    <p class="right">by <a href="https://arihant25.github.io">Arihant Tripathy</a><br><a href="https://github.com/Arihant25/musescore-note-names">Source on GitHub</a></p>
+  </header>
+
+  <main>
+    <div class="page demo">
+      <div id="staff" role="img" aria-label="A short piano passage in G minor. Each note has its name written beside it."></div>
+      <div class="controls">
+        <label class="toggle"><input type="checkbox" id="show" checked> Show names</label>
+        <div class="seg" role="group" aria-label="Naming system">
+          <button type="button" data-system="english" aria-pressed="true">C D E</button>
+          <button type="button" data-system="solfege" aria-pressed="false">Do Re Mi</button>
+          <button type="button" data-system="german" aria-pressed="false">German</button>
+        </div>
+      </div>
+
+      <p class="lede">See the name of every note on musescore.com. Read a new piece without counting lines.</p>
+      <div class="actions">
+        <a class="btn primary" id="store-link" href="https://github.com/Arihant25/musescore-note-names/releases/latest">Add to Chrome</a>
+        <a class="btn" href="https://github.com/Arihant25/musescore-note-names">View the source</a>
+      </div>
+      <p class="fine">Free and open source. No account. Nothing tracked.</p>
+    </div>
+
+    <div class="band">
+      <div class="page">
+        <img src="img/focus.png" width="1482" height="654" alt="A piano score on musescore.com with a red note name beside every note">
+        <p class="caption">A real score on musescore.com. Focus mode is on.</p>
+      </div>
+    </div>
+
+    <section class="page text">
+      <h2>It reads the score like you do</h2>
+      <div class="prose">
+        <p>Each name comes from the music itself. The extension checks the clef and the key signature. It also tracks every accidental in the bar.</p>
+      </div>
+      <dl class="reads">
+        <dt>Keys and accidentals</dt>
+        <dd>Key changes work. Accidentals last until the barline. Ties carry them into the next bar. Double sharps and flats work too.</dd>
+        <dt>Piano music</dt>
+        <dd>Every note in a chord gets a name. Ledger notes between the hands go to the right staff.</dd>
+        <dt>Any clef</dt>
+        <dd>Treble, bass, alto and tenor. Clef changes mid-line work too.</dd>
+        <dt>Your naming</dt>
+        <dd>Choose C D E, German or Do Re Mi. Add octave numbers if you like. You can also colour each letter.</dd>
+        <dt>Out of the way</dt>
+        <dd>Names sit beside each note. They never cover it. They stay readable at any zoom.</dd>
+      </dl>
+    </section>
+
+    <section class="page text">
+      <div class="with-popup">
+        <div class="prose">
+          <h2>Set it up once</h2>
+          <p>Click the toolbar icon to change the settings. Pick a naming system and a size.</p>
+          <p>Want to test yourself? Press <kbd>Alt</kbd> + <kbd>N</kbd> to hide the names.</p>
+        </div>
+        <img src="img/popup.png" width="464" height="627" alt="The extension settings: naming system, position, size, colour and focus mode">
+      </div>
+    </section>
+
+    <section class="page text" id="focus">
+      <h2>Focus mode</h2>
+      <div class="prose">
+        <p>One click hides the clutter. Banners, sidebars and pop-ups all go. The pages and the player stay.</p>
+        <p>Turn it on with <kbd>Alt</kbd> + <kbd>Shift</kbd> + <kbd>F</kbd>. Press <kbd>Esc</kbd> to leave.</p>
+      </div>
+      <div class="compare" id="compare">
+        <img src="img/focus.png" width="1482" height="654" alt="The score in focus mode">
+        <img class="before" src="img/page.png" width="1482" height="654" alt="The same score on the normal musescore.com page">
+        <span class="handle" aria-hidden="true"></span>
+        <input type="range" min="0" max="100" value="50" aria-label="Compare the normal page with focus mode">
+      </div>
+      <div class="compare-labels"><span>Normal page</span><span>Focus mode</span></div>
+    </section>
+
+    <section class="page text" id="install">
+      <h2>Install</h2>
+      <ol class="install">
+        <li>Get it from the <a id="store-link-2" href="https://github.com/Arihant25/musescore-note-names/releases/latest">Chrome Web Store</a>. It also works in Edge and Brave.</li>
+        <li>Or download the zip from the <a href="https://github.com/Arihant25/musescore-note-names/releases/latest">latest release</a>. Unzip it.</li>
+        <li>Open <code>chrome://extensions</code> and turn on Developer mode. Click <em>Load unpacked</em> and pick the folder.</li>
+      </ol>
+      <p class="caption">Some old scores are only images. Their notes can't be read. The popup will tell you.</p>
+    </section>
+  </main>
+
+  <footer>
+    <div class="page">
+      <p>Made by <a href="https://arihant25.github.io">Arihant Tripathy</a>. MIT licence.</p>
+      <p><a href="privacy.html">Privacy policy</a> &nbsp; <a href="https://github.com/Arihant25/musescore-note-names/issues">Report a problem</a></p>
+      <p>Not affiliated with MuseScore or Muse Group.</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/vexflow@4.2.3/build/cjs/vexflow.js"></script>
+  <script>
+  (function () {
+    // Before/after slider
+    const cmp = document.getElementById('compare');
+    const range = cmp.querySelector('input');
+    const setPos = () => cmp.style.setProperty('--pos', range.value + '%');
+    range.addEventListener('input', setPos);
+    setPos();
+
+    // Live demo: an original passage in G minor, engraved with VexFlow.
+    const host = document.getElementById('staff');
+    if (!window.Vex || !Vex.Flow) { host.style.display = 'none'; return; }
+    const VF = Vex.Flow;
+
+    // Keys are real pitches ("bb/4" is B flat). "!" marks an accidental
+    // that is written in the score (not covered by the key signature).
+    const music = {
+      treble: [
+        [[['d/5'], 'q'], [['g/4'], '8'], [['bb/4'], '8'], [['d/5'], 'q']],
+        [[['c/5'], 'q'], [['eb/5'], 'q'], [['f#/4!'], 'q']],
+        [[['g/4', 'bb/4', 'd/5'], 'hd']],
+      ],
+      bass: [
+        [[['g/2'], 'q'], [['g/3', 'bb/3', 'd/4'], 'q'], [['g/3', 'bb/3', 'd/4'], 'q']],
+        [[['a/2'], 'q'], [['a/3', 'c/4', 'eb/4'], 'q'], [['d/3', 'f#/3!', 'c/4'], 'q']],
+        [[['g/2', 'd/3'], 'hd']],
+      ],
+    };
+
+    const NAMES = {
+      english: ['C', 'D', 'E', 'F', 'G', 'A', 'B'],
+      solfege: ['Do', 'Re', 'Mi', 'Fa', 'Sol', 'La', 'Si'],
+    };
+    function noteName(key, system) {
+      const pc = key.split('/')[0];
+      const letter = 'cdefgab'.indexOf(pc[0]);
+      const alter = pc[1] === '#' ? 1 : pc[1] === 'b' ? -1 : 0;
+      if (system === 'german') {
+        const base = 'CDEFGAH'[letter];
+        if (alter === 1) return base + 'is';
+        if (alter === -1) return letter === 6 ? 'B' : letter === 2 ? 'Es' : letter === 5 ? 'As' : base + 'es';
+        return base;
+      }
+      return NAMES[system][letter] + (alter === 1 ? '♯' : alter === -1 ? '♭' : '');
+    }
+
+    let system = 'english';
+    const labels = [];
+
+    const W = 900, H = 250;
+    const renderer = new VF.Renderer(host, VF.Renderer.Backends.SVG);
+    renderer.resize(W, H);
+    const ctx = renderer.getContext();
+    const svg = host.querySelector('svg');
+    svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+    svg.removeAttribute('width');
+    svg.removeAttribute('height');
+    svg.removeAttribute('style');
+
+    const widths = [380, 270, 220];
+    let x = 10;
+    widths.forEach((w, i) => {
+      const top = new VF.Stave(x, 10, w);
+      const bot = new VF.Stave(x, 120, w);
+      if (i === 0) {
+        top.addClef('treble').addKeySignature('Gm').addTimeSignature('3/4');
+        bot.addClef('bass').addKeySignature('Gm').addTimeSignature('3/4');
+      }
+      if (i === widths.length - 1) {
+        top.setEndBarType(VF.Barline.type.END);
+        bot.setEndBarType(VF.Barline.type.END);
+      }
+      top.setContext(ctx).draw();
+      bot.setContext(ctx).draw();
+      if (i === 0) {
+        new VF.StaveConnector(top, bot).setType('brace').setContext(ctx).draw();
+        new VF.StaveConnector(top, bot).setType('singleLeft').setContext(ctx).draw();
+      }
+      new VF.StaveConnector(top, bot)
+        .setType(i === widths.length - 1 ? 'boldDoubleRight' : 'singleRight')
+        .setContext(ctx).draw();
+
+      const parts = [['treble', top], ['bass', bot]].map(([clef, stave]) => {
+        const notes = music[clef][i].map(([keys, duration]) => {
+          const n = new VF.StaveNote({ keys: keys.map((k) => k.replace('!', '')), duration, clef, auto_stem: true });
+          keys.forEach((k, j) => { if (k.includes('!')) n.addModifier(new VF.Accidental('#'), j); });
+          if (duration.endsWith('d')) VF.Dot.buildAndAttach([n], { all: true });
+          n.srcKeys = keys.map((k) => k.replace('!', ''));
+          return n;
+        });
+        const voice = new VF.Voice({ num_beats: 3, beat_value: 4 }).addTickables(notes);
+        return { voice, notes, stave };
+      });
+      const firstX = top.getNoteStartX() - x;
+      new VF.Formatter()
+        .joinVoices([parts[0].voice]).joinVoices([parts[1].voice])
+        .format([parts[0].voice, parts[1].voice], w - firstX - 40);
+
+      for (const { voice, notes, stave } of parts) {
+        voice.draw(ctx, stave);
+        for (const n of notes) {
+          const ys = n.getYs();
+          const xr = n.getNoteHeadEndX() + (n.getDuration && n.isDotted && n.isDotted() ? 14 : 6);
+          // getYs() follows the note's key order sorted by staff line.
+          const sorted = [...n.srcKeys].sort((a, b) =>
+            VF.keyProperties(a, n.clef).line - VF.keyProperties(b, n.clef).line);
+          // Lowest note first; push each label up if it would touch the one below.
+          let below = Infinity;
+          sorted.forEach((key, j) => {
+            const y = Math.min(ys[j], below - 14);
+            labels.push({ x: xr, y, key });
+            below = y;
+          });
+        }
+      }
+      x += w;
+    });
+
+    const NS = 'http://www.w3.org/2000/svg';
+    for (const l of labels) {
+      const t = document.createElementNS(NS, 'text');
+      t.setAttribute('class', 'nn');
+      t.setAttribute('x', l.x);
+      t.setAttribute('y', l.y);
+      t.setAttribute('dominant-baseline', 'central');
+      t.textContent = noteName(l.key, system);
+      l.el = t;
+      svg.appendChild(t);
+    }
+
+    document.getElementById('show').addEventListener('change', (e) => host.classList.toggle('off', !e.target.checked));
+    document.querySelectorAll('.seg button').forEach((b) => b.addEventListener('click', () => {
+      system = b.dataset.system;
+      document.querySelectorAll('.seg button').forEach((o) => o.setAttribute('aria-pressed', String(o === b)));
+      for (const l of labels) l.el.textContent = noteName(l.key, system);
+    }));
+  })();
+  </script>
+</body>
+</html>
