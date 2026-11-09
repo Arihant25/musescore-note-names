@@ -20,6 +20,7 @@
       --red: #d0021b;
       --navy: #202140;
       --mist: #eef0f5;
+      --desk: #e4e6ec;
       --soft: #4a4d57;
       --measure: 34rem;
       --serif: "Old Standard TT", "Century Schoolbook", Georgia, serif;
@@ -40,38 +41,45 @@
 
     .page { max-width: 68rem; margin: 0 auto; padding: 0 1.25rem; }
 
-    /* score title block */
+    /* the hero is the first page of a printed score, lying on the desk */
+    .desk { background: var(--desk); padding: 2rem 1.25rem 2.5rem; }
+    .sheet {
+      max-width: 60rem; margin: 0 auto; background: var(--paper);
+      padding: 2.75rem 3.5rem 1.1rem;
+      box-shadow: 0 1px 2px rgba(32, 33, 64, .14), 0 14px 34px -14px rgba(32, 33, 64, .4);
+    }
     .title-block {
       display: grid;
       grid-template-columns: 1fr auto 1fr;
       align-items: end;
       column-gap: 1rem;
-      padding: 3.5rem 1.25rem 0;
     }
     .title-block h1 {
       grid-column: 2;
       margin: 0;
-      font: 400 clamp(2.9rem, 8vw, 5.6rem)/1 var(--serif);
-      letter-spacing: -.01em;
+      font: 400 clamp(2.6rem, 6vw, 4.2rem)/1 var(--serif);
       text-align: center;
     }
     .title-block .sub {
       grid-column: 2;
-      margin: .35rem 0 0;
-      font: italic 400 clamp(1.25rem, 2.6vw, 1.7rem)/1.2 var(--serif);
+      margin: .4rem 0 0;
+      font: 400 clamp(1.15rem, 2.2vw, 1.5rem)/1.2 var(--serif);
       text-align: center;
     }
     .title-block .left, .title-block .right {
-      margin: 0;
-      font: 400 1rem/1.4 var(--serif);
-      color: var(--soft);
-      padding-bottom: .3rem;
+      grid-row: 3;
+      margin: 1.1rem 0 0;
+      font: 400 1rem/1.35 var(--serif);
     }
-    .title-block .left { grid-column: 1; grid-row: 2; }
-    .title-block .right { grid-column: 3; grid-row: 2; text-align: right; }
+    .title-block .left { grid-column: 1; }
+    .title-block .right { grid-column: 3; text-align: right; }
+    .title-block a { text-decoration: none; }
+    .title-block a:hover { text-decoration: underline; }
+    .tempo { margin: 1.2rem 0 0; font: 400 1.05rem/1 var(--serif); }
+    .tempo b { font-weight: 700; margin-right: .4rem; }
+    .colophon { margin: .4rem 0 0; text-align: center; font: 400 .8rem/1.4 var(--serif); color: var(--soft); }
 
     /* live demo */
-    .demo { margin-top: 2rem; }
     #staff svg { width: 100%; height: auto; display: block; }
     #staff .nn {
       font: 700 15px var(--sans);
@@ -83,12 +91,12 @@
       transition: opacity .25s ease;
     }
     #staff.off .nn { opacity: 0; }
-    .controls {
-      display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
-      gap: .75rem 1.5rem;
-      margin-top: .75rem;
-      font-size: .95rem;
+    .under {
+      max-width: 60rem; margin: 1.6rem auto 0;
+      display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1.5rem 2rem;
     }
+    .controls { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem 1.25rem; font-size: .95rem; }
+    .controls-label { color: var(--soft); }
     .seg { display: inline-flex; border: 1.5px solid var(--ink); border-radius: 6px; overflow: hidden; }
     .seg button {
       font: inherit; padding: .35rem .8rem; border: 0; background: var(--paper); color: var(--ink); cursor: pointer;
@@ -98,14 +106,8 @@
     .toggle { display: inline-flex; align-items: center; gap: .5rem; cursor: pointer; }
     .toggle input { accent-color: var(--red); width: 1.05rem; height: 1.05rem; }
 
-    .lede {
-      max-width: var(--measure);
-      margin: 2.5rem auto 0;
-      text-align: center;
-      font-size: 1.25rem;
-      line-height: 1.5;
-    }
-    .actions { display: flex; flex-wrap: wrap; gap: .75rem; justify-content: center; margin-top: 1.75rem; }
+    .lede { max-width: 30rem; margin: 0; font-size: 1.2rem; line-height: 1.45; }
+    .actions { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: 1rem; }
     .btn {
       display: inline-block; padding: .8rem 1.4rem; border-radius: 6px;
       font: 700 1rem/1 var(--sans); text-decoration: none;
@@ -114,10 +116,9 @@
     .btn:hover { color: var(--paper); background: var(--ink); }
     .btn.primary { background: var(--red); border-color: var(--red); color: #fff; }
     .btn.primary:hover { background: #a80016; border-color: #a80016; color: #fff; }
-    .fine { text-align: center; color: var(--soft); font-size: .9rem; margin: .9rem 0 0; }
 
     /* sections */
-    .band { background: var(--mist); margin-top: 5rem; padding: 3.5rem 0; }
+    .band { margin-top: 4rem; }
     .band img { border-radius: 4px; box-shadow: 0 18px 40px -24px rgba(32, 33, 64, .45); }
     .caption { max-width: var(--measure); color: var(--soft); margin: 1rem 0 0; font-size: .95rem; }
 
@@ -168,14 +169,7 @@
 
     /* Laptops and up: tighter vertical rhythm (phones keep the airier one). */
     @media (min-width: 761px) {
-      .title-block { padding-top: 1.75rem; }
-      .title-block h1 { font-size: clamp(2.9rem, 6vw, 4.4rem); }
-      .demo { margin-top: 1rem; }
-      #staff { max-width: 54rem; margin: 0 auto; }
-      .controls { margin-top: .25rem; }
-      .lede { margin-top: 1.25rem; font-size: 1.15rem; }
-      .actions { margin-top: 1rem; }
-      .band { margin-top: 3rem; padding: 2.25rem 0; }
+      .band { margin-top: 3rem; }
       .band .page { max-width: 60rem; }
       .text { padding-top: 3.25rem; }
       h2 { margin-bottom: .6rem; }
@@ -188,10 +182,17 @@
     }
 
     @media (max-width: 760px) {
-      .title-block { grid-template-columns: 1fr; padding-top: 2.25rem; }
-      .title-block h1, .title-block .sub, .title-block .left, .title-block .right { grid-column: 1; grid-row: auto; text-align: center; }
-      .title-block .left { order: -1; padding-bottom: 1rem; }
-      .title-block .right { padding-top: 1rem; }
+      .desk { padding: 1rem .75rem 2rem; }
+      .sheet { padding: 1.75rem 1rem .8rem; }
+      .title-block { grid-template-columns: 1fr 1fr; }
+      .title-block h1, .title-block .sub { grid-column: 1 / -1; }
+      .title-block .right { grid-column: 2; }
+      .title-block h1 { font-size: clamp(2rem, 11vw, 2.6rem); white-space: nowrap; }
+      .title-block .left, .title-block .right { font-size: .8rem; margin-top: .8rem; white-space: nowrap; }
+      #staff { overflow-x: auto; margin: 0 -1rem; padding: 0 1rem; scrollbar-width: thin; }
+      #staff svg { min-width: 600px; }
+      .tempo { font-size: .95rem; }
+      .under { flex-direction: column; align-items: stretch; }
       dl.reads { grid-template-columns: 1fr; gap: .3rem; }
       dl.reads dd { margin-bottom: 1rem; }
       .with-popup { grid-template-columns: 1fr; }
@@ -203,31 +204,38 @@
   </style>
 </head>
 <body>
-  <header class="title-block">
-    <h1>Note Names</h1>
-    <p class="sub">for MuseScore</p>
-    <p class="left">A Chrome extension<br>for musescore.com</p>
-    <p class="right">by <a href="https://arihant25.github.io">Arihant Tripathy</a><br><a href="https://github.com/Arihant25/musescore-note-names">Source on GitHub</a></p>
-  </header>
-
   <main>
-    <div class="page demo">
-      <div id="staff" role="img" aria-label="A short piano passage in G minor. Each note has its name written beside it."></div>
-      <div class="controls">
-        <label class="toggle"><input type="checkbox" id="show" checked> Show names</label>
-        <div class="seg" role="group" aria-label="Naming system">
-          <button type="button" data-system="english" aria-pressed="true">C D E</button>
-          <button type="button" data-system="solfege" aria-pressed="false">Do Re Mi</button>
-          <button type="button" data-system="german" aria-pressed="false">German</button>
+    <div class="desk">
+      <article class="sheet">
+        <header class="title-block">
+          <h1>Note Names</h1>
+          <p class="sub">for MuseScore</p>
+          <p class="left">For Chrome</p>
+          <p class="right"><a href="https://arihant25.github.io">Arihant Tripathy</a></p>
+        </header>
+        <p class="tempo"><b>Andante</b>&#9833; = 92</p>
+        <div id="staff" role="img" aria-label="A short piano passage in G minor. Each note has its name written beside it."></div>
+        <p class="colophon">Free and open source. MIT licence. No account and nothing tracked.</p>
+      </article>
+
+      <div class="under">
+        <div>
+          <p class="lede">See the name of every note on musescore.com. Read a new piece without counting lines.</p>
+          <div class="actions">
+            <a class="btn primary" id="store-link" href="https://github.com/Arihant25/musescore-note-names/releases/latest">Add to Chrome</a>
+            <a class="btn" href="https://github.com/Arihant25/musescore-note-names">View the source</a>
+          </div>
+        </div>
+        <div class="controls">
+          <span class="controls-label">Try it:</span>
+          <label class="toggle"><input type="checkbox" id="show" checked> Show names</label>
+          <div class="seg" role="group" aria-label="Naming system">
+            <button type="button" data-system="english" aria-pressed="true">C D E</button>
+            <button type="button" data-system="solfege" aria-pressed="false">Do Re Mi</button>
+            <button type="button" data-system="german" aria-pressed="false">German</button>
+          </div>
         </div>
       </div>
-
-      <p class="lede">See the name of every note on musescore.com. Read a new piece without counting lines.</p>
-      <div class="actions">
-        <a class="btn primary" id="store-link" href="https://github.com/Arihant25/musescore-note-names/releases/latest">Add to Chrome</a>
-        <a class="btn" href="https://github.com/Arihant25/musescore-note-names">View the source</a>
-      </div>
-      <p class="fine">Free and open source. No account. Nothing tracked.</p>
     </div>
 
     <div class="band">
@@ -361,8 +369,8 @@
     svg.removeAttribute('height');
     svg.removeAttribute('style');
 
-    const widths = [380, 270, 220];
-    let x = 10;
+    const widths = [350, 265, 215];
+    let x = 62;
     widths.forEach((w, i) => {
       const top = new VF.Stave(x, 10, w);
       const bot = new VF.Stave(x, 120, w);
@@ -421,6 +429,14 @@
     });
 
     const NS = 'http://www.w3.org/2000/svg';
+    // Instrument name left of the first system, as on a real score.
+    const inst = document.createElementNS(NS, 'text');
+    inst.setAttribute('x', 4);
+    inst.setAttribute('y', 128);
+    inst.setAttribute('dominant-baseline', 'central');
+    inst.setAttribute('style', 'font: 400 16px "Old Standard TT", Georgia, serif; fill: #000');
+    inst.textContent = 'Piano';
+    svg.appendChild(inst);
     for (const l of labels) {
       const t = document.createElementNS(NS, 'text');
       t.setAttribute('class', 'nn');
